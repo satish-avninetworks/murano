@@ -126,6 +126,15 @@ class Agent(object):
 
     @specs.parameter(
         'resources', dsl.MuranoObjectParameter('io.murano.system.Resources'))
+    def call_modified(self, template, resources, timeout=None):
+        if timeout is None:
+            timeout = CONF.engine.agent_timeout
+        self._check_enabled()
+        plan = self.build_execution_plan(template, resources())
+        return plan
+
+    @specs.parameter(
+        'resources', dsl.MuranoObjectParameter('io.murano.system.Resources'))
     def send(self, template, resources):
         self._check_enabled()
         plan = self.build_execution_plan(template, resources())

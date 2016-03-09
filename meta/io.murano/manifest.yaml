@@ -55,6 +55,7 @@ Classes:
   io.murano.resources.ExistingCinderVolume: resources/ExistingCinderVolume.yaml
   io.murano.resources.CinderVolumeBackup: resources/CinderVolumeBackup.yaml
   io.murano.resources.CinderVolumeSnapshot: resources/CinderVolumeSnapshot.yaml
+  io.murano.resources.AWSInstance: resources/AWSInstance.yaml
 
   io.murano.system.Agent: system/Agent.yaml
   io.murano.system.AgentListener: system/AgentListener.yaml
@@ -68,5 +69,6 @@ Classes:
   io.murano.system.NeutronSecurityGroupManager: system/NeutronSecurityGroupManager.yaml
   io.murano.system.AwsSecurityGroupManager: system/AwsSecurityGroupManager.yaml
   io.murano.system.MistralClient: system/MistralClient.yaml
+  io.murano.system.AWSBinding: system/AWSBinding.yaml
 
   io.murano.test.TestFixture: test/TestFixture.yaml
