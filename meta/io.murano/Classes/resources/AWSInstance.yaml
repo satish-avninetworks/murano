@@ -10,6 +10,9 @@ Properties:
   agent:
     Contract: $.class(sys:Agent)
     Usage: Runtime
+  assignFloatingIp:
+    Contract: $.bool().notNull()
+    Default: false
 
 Methods:
   initialize:
