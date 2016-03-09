@@ -13,6 +13,12 @@ Properties:
   assignFloatingIp:
     Contract: $.bool().notNull()
     Default: false
+  floatingIpAddress:
+    Contract: $.string()
+    Usage: Out
+  ipAddresses:
+    Contract: [$.string()]
+    Usage: Out
 
 Methods:
   initialize:
