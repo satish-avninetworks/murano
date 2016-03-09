@@ -31,7 +31,7 @@ class AWSBinding(object):
     def destroynode(self,node):
         self.driver.destroy_node(node)
   
-    def deploynode(self,plan):
+    def deploynode(self,plan,name):
         ssh_keypath = os.path.expanduser('~/.ssh/id_rsa')
         with open(ssh_keypath+".pub") as f:
             public_key = f.read()
@@ -44,7 +44,7 @@ class AWSBinding(object):
         script = ScriptDeployment(plan['Files'][entry]['Body'])
         msd = MultiStepDeployment([key,script])
         try:
-            self.driver.deploy_node(name="Test111",image=images,size=sizes[0],ssh_key=ssh_keypath,ssh_username='ubuntu',deploy=msd,timeout=1800,ex_keyname="avni_key")
+            self.driver.deploy_node(name=name,image=images,size=sizes[0],ssh_key=ssh_keypath,ssh_username='ubuntu',deploy=msd,timeout=1800,ex_keyname="avni_key")
         except NotImplementedError:
             print("Deploy Node is not implemented for this driver")
         

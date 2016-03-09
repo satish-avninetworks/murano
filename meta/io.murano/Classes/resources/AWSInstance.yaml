@@ -7,6 +7,8 @@ Namespaces:
 Name: AWSInstance
 
 Properties:
+  name:
+    Contract: $.string().notNull()
   agent:
     Contract: $.class(sys:Agent)
     Usage: Runtime
@@ -36,7 +38,7 @@ Methods:
         Contract: {}
     Body:
       - $.driver: new(sys:AWSBinding)
-      - $.driver.deploynode($plan)
+      - $.driver.deploynode($plan,$.name)
 
   destroy:
     Body:
