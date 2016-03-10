@@ -31,12 +31,12 @@ class AWSBinding(object):
     def destroynode(self,node):
         self.driver.destroy_node(node)
   
-    def deploynode(self,plan,name):
+    def deploynode(self,plan,imageid,name):
         ssh_keypath = os.path.expanduser('~/.ssh/id_rsa')
         with open(ssh_keypath+".pub") as f:
             public_key = f.read()
         key = SSHKeyDeployment(public_key)
-        images = NodeImage(id='ami-0bb6454f',name=None,driver=self.driver)
+        images = NodeImage(id=imageid,name=None,driver=self.driver)
         sizes = self.driver.list_sizes()
         #script1 = ScriptDeployment("sudo apt-get -y update")
         #script2 = ScriptDeployment("sudo apt-get install -y apache2")

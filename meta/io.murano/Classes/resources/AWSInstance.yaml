@@ -21,6 +21,9 @@ Properties:
   ipAddresses:
     Contract: [$.string()]
     Usage: Out
+  image:
+    Contract: $.string().notNull()
+
 
 Methods:
   initialize:
@@ -38,7 +41,7 @@ Methods:
         Contract: {}
     Body:
       - $.driver: new(sys:AWSBinding)
-      - $.driver.deploynode($plan,$.name)
+      - $.driver.deploynode($plan,$.image,$.name)
 
   destroy:
     Body:
