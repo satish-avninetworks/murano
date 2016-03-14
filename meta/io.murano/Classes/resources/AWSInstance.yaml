@@ -6,24 +6,7 @@ Namespaces:
 
 Name: AWSInstance
 
-Properties:
-  name:
-    Contract: $.string().notNull()
-  agent:
-    Contract: $.class(sys:Agent)
-    Usage: Runtime
-  assignFloatingIp:
-    Contract: $.bool().notNull()
-    Default: false
-  floatingIpAddress:
-    Contract: $.string()
-    Usage: Out
-  ipAddresses:
-    Contract: [$.string()]
-    Usage: Out
-  image:
-    Contract: $.string().notNull()
-
+Extends: Instance
 
 Methods:
   initialize:
