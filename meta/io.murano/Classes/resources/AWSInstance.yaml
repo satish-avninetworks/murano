@@ -1,0 +1,48 @@
+Namespaces:
+  =: io.murano.resources
+  std: io.murano
+  sys: io.murano.system
+
+
+Name: AWSInstance
+
+Properties:
+  name:
+    Contract: $.string().notNull()
+  image:
+    Contract: $.string().notNull()
+  agent:
+    Contract: $.class(sys:Agent)
+    Usage: Runtime
+  ipAddresses:
+    Contract: [$.string()]
+    Usage: Out
+  assignFloatingIp:
+    Contract: $.bool().notNull()
+    Default: false
+  floatingIpAddress:
+    Contract: $.string()
+    Usage: Out
+
+Methods:
+  initialize:
+    Body:
+      - $.environment: $.find(std:Environment).require()
+      - $.resources: new(sys:Resources)
+      - $.instanceTemplate: {}
+      - $._floatingIpOutputName: null
+      - $.node: null
+      - $.agent: new(sys:Agent, host => $)
+
+  deploy:
+    Arguments:
+      plan:
+        Contract: {}
+    Body:
+      - $.driver: new(sys:AWSBinding)
+      - $.node: $.driver.deploynode($plan,$.image,$.name)
+
+  destroy:
+    Body:
+      - $.driver.destroynode($.node)
+

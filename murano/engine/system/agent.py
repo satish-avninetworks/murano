@@ -122,6 +122,15 @@ class Agent(object):
 
     @specs.parameter(
         'resources', dsl.MuranoType('io.murano.system.Resources'))
+    def callmodified(self, template, resources, timeout=None):
+        if timeout is None:
+            timeout = CONF.engine.agent_timeout
+        self._check_enabled()
+        plan = self.build_execution_plan(template, resources())
+        return plan
+
+    @specs.parameter(
+        'resources', dsl.MuranoType('io.murano.system.Resources'))
     def call(self, template, resources, timeout=None):
         if timeout is None:
             timeout = CONF.engine.agent_timeout

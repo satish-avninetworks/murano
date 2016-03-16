@@ -16,6 +16,7 @@
 from murano.engine.system import agent
 from murano.engine.system import agent_listener
 from murano.engine.system import heat_stack
+from murano.engine.system import AWSBinding
 from murano.engine.system import instance_reporter
 from murano.engine.system import logger
 from murano.engine.system import mistralclient
@@ -31,6 +32,7 @@ def register(package):
     package.register_class(mistralclient.MistralClient)
     package.register_class(resource_manager.ResourceManager)
     package.register_class(instance_reporter.InstanceReportNotifier)
+    package.register_class(AWSBinding.AWSBinding)
     package.register_class(status_reporter.StatusReporter)
     package.register_class(net_explorer.NetworkExplorer)
     package.register_class(logger.Logger)
