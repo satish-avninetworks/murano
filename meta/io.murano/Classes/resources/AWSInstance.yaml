@@ -40,8 +40,11 @@ Methods:
         Contract: {}
     Body:
       - $.driver: new(sys:AWSBinding)
-      - $.node: $.driver.deploynode($plan,$.image,$.name)
-
+      - If: not $.node
+        Then:
+          - $.node: $.driver.deploynode($plan,$.image,$.name)
+        Else:
+          - $.driver.runscripts($.node,$plan)
   destroy:
     Body:
       - $.driver.destroynode($.node)
