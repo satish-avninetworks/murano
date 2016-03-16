@@ -63,7 +63,7 @@ class AWSBinding(object):
            node.driver._connect_and_run_deployment_script(
                         task=msd, node=node,
                         ssh_hostname=node.public_ips[0], ssh_port=22,
-                        ssh_username='ubuntu', ssh_password=password,
+                        ssh_username='ubuntu', ssh_password='password',
                         ssh_key_file=ssh_keypath, ssh_timeout=1800,
                         timeout=300, max_tries=3)
         except Exception:
