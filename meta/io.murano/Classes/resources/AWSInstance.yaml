@@ -12,7 +12,7 @@ Properties:
   image:
     Contract: $.string().notNull()
   agent:
-    Contract: $.class(sys:SshAgent)
+    Contract: $.class(sys:SSHAgent)
     Usage: Runtime
   ipAddresses:
     Contract: [$.string()]
@@ -32,7 +32,7 @@ Methods:
       - $.instanceTemplate: {}
       - $._floatingIpOutputName: null
       - $.node: null
-      - $.agent: new(sys:SshAgent, host => $)
+      - $.agent: new(sys:SSHAgent, host => $)
 
   deploy:
     Arguments:
@@ -41,6 +41,7 @@ Methods:
     Body:
       - $.driver: new(sys:AWSBinding)
       - $.node: $.driver.createnode($.image,$.name)
+      - $.ipAddresses: $.driver.getpublicips($.node)
       - $.agent.setnode($.node)
   destroy:
     Body:

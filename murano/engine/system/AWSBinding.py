@@ -37,18 +37,19 @@ class AWSBinding(object):
         self.cls = get_driver(Provider.EC2)
         self.driver = self.cls('AKIAIETZPSM636GLXORA','rOLla8GFbmAB16Zi3TMzOMgoeoicrB7BUY0nOmg+',region="us-west-1")
 
-    def createnode(self,name):
-        images = NodeImage(id='imageID',name=None,driver=self.driver)
+    def createnode(self,image,name):
+        images = NodeImage(id='ami-0bb6454f',name=None,driver=self.driver)
         sizes = self.driver.list_sizes()
         node = self.driver.create_node(name=name,image=images,size=sizes[0])
         # Wait until node is up and running and has IP assigned
         try:
-            node, ip_addresses = self.driver.wait_until_running(nodes=[node])[0]
+            node, ipaddresses = self.driver.wait_until_running(nodes=[node])[0]
         except Exception:
             print("Unable to ping the node, TODO how to handle this")
 
         return node
-
+    def getpublicips(self,node):
+        return node.public_ips
     def destroynode(self,node):
         self.driver.destroy_node(node)
   
@@ -67,22 +68,3 @@ class AWSBinding(object):
             print("Deploy Node is not implemented for this driver")
         return node
 
-    def runscripts(self,node, plan):
-        ssh_keypath = os.path.expanduser('~/.ssh/id_rsa')
-        with open(ssh_keypath+".pub") as f:
-            public_key = f.read()
-
-        key = SSHKeyDeployment(public_key)
-        script = ScriptDeployment(plan['Files'].values()[0]['Body'],args=plan['Parameters'].values())
-        msd = MultiStepDeployment([key,script])
-
-        #Create the SSH client and push the script
-        try:
-           node.driver._connect_and_run_deployment_script(
-                        task=msd, node=node,
-                        ssh_hostname=node.public_ips[0], ssh_port=22,
-                        ssh_username='ubuntu',
-                        ssh_key_file=ssh_keypath, ssh_timeout=1800,
-                        timeout=300, max_tries=3,ssh_password='avni1234')
-        except Exception:
-            print("Unable to run scripts on this driver")    
