@@ -16,6 +16,7 @@ import routes
 
 from murano.api.v1 import actions
 from murano.api.v1 import catalog
+from murano.api.v1 import cloud_credentials
 from murano.api.v1 import deployments
 from murano.api.v1 import environments
 from murano.api.v1 import instance_statistics
@@ -253,6 +254,20 @@ class API(wsgi.Router):
                        conditions={'method': ['POST']})
         mapper.connect('/catalog/categories/{category_id}',
                        controller=catalog_resource,
+                       action='delete_category',
+                       conditions={'method': ['DELETE']})
+
+        cloud_credential_resource = cloud_credentials.create_resource()
+        mapper.connect('/identity/cloudcredntial/{category_id}',
+                       controller=cloud_credential_resource,
+                       action='get_category',
+                       conditions={'method': ['GET']})
+        mapper.connect('/identity/cloudcredntial/',
+                       controller=cloud_credential_resource,
+                       action='add_category',
+                       conditions={'method': ['POST']})
+        mapper.connect('/identity/cloudcredntial/{category_id}',
+                       controller=cloud_credential_resource,
                        action='delete_category',
                        conditions={'method': ['DELETE']})
         req_stats_resource = request_statistics.create_resource()

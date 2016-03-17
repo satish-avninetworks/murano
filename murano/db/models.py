@@ -23,6 +23,7 @@ from sqlalchemy import orm as sa_orm
 
 from murano.common import uuidutils
 from murano.db.sqla import types as st
+from sqlalchemy_utils import EncryptedType
 
 
 class TimestampMixin(object):
@@ -358,12 +359,54 @@ class CFServiceInstance(Base):
             del dictionary['environment']
         return dictionary
 
+# TODO(Govardhan) Need to find a better way for secret_key
+secret_key = 'secretkey1234'
+
+
+class CloudCredentials(Base, TimestampMixin):
+    __tablename__ = 'cloud_credentials'
+
+    id = sa.Column(sa.String(36),
+                   primary_key=True,
+                   default=uuidutils.generate_uuid)
+    name = sa.Column(sa.String(255), nullable=False)
+    tenant_id = sa.Column(sa.String(36), nullable=False)
+    version = sa.Column(sa.BigInteger, nullable=False, default=0)
+    cloud_type = sa.Column(sa.String(36), nullable=False)
+    user = sa.Column(sa.String(255), nullable=False)
+    key = sa.Column(EncryptedType(sa.String, secret_key))
+    private_key = sa.Column(EncryptedType(sa.String, secret_key))
+    endpoint = sa.Column(sa.String(255), nullable=False)
+    option = sa.Column(st.JsonBlob(), nullable=False, default={})
+
+    def to_dict(self):
+        dictionary = super(CloudCredentials, self).to_dict()
+        if 'environment' in dictionary:
+            del dictionary['environment']
+        return dictionary
+
+
+class InstanceCredentials(Base, TimestampMixin):
+    __tablename__ = 'instance_credentials'
+
+    id = sa.Column(sa.String(36),
+                   primary_key=True,
+                   default=uuidutils.generate_uuid)
+    name = sa.Column(sa.String(255), nullable=False)
+    tenant_id = sa.Column(sa.String(36), nullable=False)
+    version = sa.Column(sa.BigInteger, nullable=False, default=0)
+    cloud_type = sa.Column(sa.String(36), nullable=False)
+    user = sa.Column(sa.String(255), nullable=False)
+    password = sa.Column(EncryptedType(sa.String, secret_key))
+    key_pair = sa.Column(EncryptedType(sa.String, secret_key))
+    options = sa.Column(st.JsonBlob(), nullable=False, default={})
+
 
 def register_models(engine):
     """Creates database tables for all models with the given engine."""
     models = (Environment, Status, Session, Task,
               ApiStats, Package, Category, Class, Instance, Lock, CFSpace,
-              CFOrganization)
+              CFOrganization, CloudCredentials, InstanceCredentials)
     for model in models:
         model.metadata.create_all(engine)
 
@@ -372,6 +415,6 @@ def unregister_models(engine):
     """Drops database tables for all models with the given engine."""
     models = (Environment, Status, Session, Task,
               ApiStats, Package, Category, Class, Lock, CFOrganization,
-              CFSpace)
+              CFSpace, CloudCredentials, InstanceCredentials)
     for model in models:
         model.metadata.drop_all(engine)
