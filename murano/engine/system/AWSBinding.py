@@ -20,7 +20,7 @@ LOG = logging.getLogger(__name__)
 class AWSBinding(object):
     def __init__(self):
         self.cls = get_driver(Provider.EC2)
-        self.driver = self.cls('AcessID','SecretKey',region="us-west-1")
+        self.driver = self.cls('AKIAIETZPSM636GLXORA','rOLla8GFbmAB16Zi3TMzOMgoeoicrB7BUY0nOmg+',region="us-west-1")
 
     def createnode(self,name):
         images = NodeImage(id='imageID',name=None,driver=self.driver)
@@ -41,7 +41,7 @@ class AWSBinding(object):
         #script1 = ScriptDeployment("sudo apt-get -y update")
         #script2 = ScriptDeployment("sudo apt-get install -y apache2")
         #entry = plan['Scripts']['apacheDeploy']['EntryPoint']
-        script = ScriptDeployment(plan['Files'].values()[0]['Body'])
+        script = ScriptDeployment(plan['Files'].values()[0]['Body'],args=[str(x) for x in plan['Parameters'].values()])
         msd = MultiStepDeployment([key,script])
         try:
             node = self.driver.deploy_node(name=name,image=images,size=sizes[0],ssh_key=ssh_keypath,ssh_username='ubuntu',deploy=msd,timeout=1800,ex_keyname="avni_key")
@@ -55,7 +55,7 @@ class AWSBinding(object):
             public_key = f.read()
 
         key = SSHKeyDeployment(public_key)
-        script = ScriptDeployment(plan['Files'].values()[0]['Body'])
+        script = ScriptDeployment(plan['Files'].values()[0]['Body'],args=plan['Parameters'].values())
         msd = MultiStepDeployment([key,script])
 
         #Create the SSH client and push the script
@@ -63,8 +63,8 @@ class AWSBinding(object):
            node.driver._connect_and_run_deployment_script(
                         task=msd, node=node,
                         ssh_hostname=node.public_ips[0], ssh_port=22,
-                        ssh_username='ubuntu', ssh_password='password',
+                        ssh_username='ubuntu',
                         ssh_key_file=ssh_keypath, ssh_timeout=1800,
-                        timeout=300, max_tries=3)
+                        timeout=300, max_tries=3,ssh_password='avni1234')
         except Exception:
             print("Unable to run scripts on this driver")    
