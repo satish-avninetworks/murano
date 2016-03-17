@@ -1,3 +1,18 @@
+# Copyright (c) 2016 Avni
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
+# implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
 import eventlet
 import os
 import heatclient.exc as heat_exc
@@ -26,6 +41,12 @@ class AWSBinding(object):
         images = NodeImage(id='imageID',name=None,driver=self.driver)
         sizes = self.driver.list_sizes()
         node = self.driver.create_node(name=name,image=images,size=sizes[0])
+        # Wait until node is up and running and has IP assigned
+        try:
+            node, ip_addresses = self.driver.wait_until_running(nodes=[node])[0]
+        except Exception:
+            print("Unable to ping the node, TODO how to handle this")
+
         return node
 
     def destroynode(self,node):
@@ -38,9 +59,8 @@ class AWSBinding(object):
         key = SSHKeyDeployment(public_key)
         images = NodeImage(id=imageid,name=None,driver=self.driver)
         sizes = self.driver.list_sizes()
-        #script1 = ScriptDeployment("sudo apt-get -y update")
-        #script2 = ScriptDeployment("sudo apt-get install -y apache2")
-        #entry = plan['Scripts']['apacheDeploy']['EntryPoint']
+
+        #TODO - deploy_node() with no script, get rid of "plan"
         script = ScriptDeployment(plan['Files'].values()[0]['Body'])
         msd = MultiStepDeployment([key,script])
         try:
@@ -49,22 +69,3 @@ class AWSBinding(object):
             print("Deploy Node is not implemented for this driver")
         return node
    
-    def runscripts(self,node,plan):
-        ssh_keypath = os.path.expanduser('~/.ssh/id_rsa')
-        with open(ssh_keypath+".pub") as f:
-            public_key = f.read()
-
-        key = SSHKeyDeployment(public_key)
-        script = ScriptDeployment(plan['Files'].values()[0]['Body'])
-        msd = MultiStepDeployment([key,script])
-
-        #Create the SSH client and push the script
-        try:
-           node.driver._connect_and_run_deployment_script(
-                        task=msd, node=node,
-                        ssh_hostname=node.public_ips[0], ssh_port=22,
-                        ssh_username='ubuntu', ssh_password=password,
-                        ssh_key_file=ssh_keypath, ssh_timeout=1800,
-                        timeout=300, max_tries=3)
-        except Exception:
-            print("Unable to run scripts on this driver")

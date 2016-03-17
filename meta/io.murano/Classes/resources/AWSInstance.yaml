@@ -12,7 +12,7 @@ Properties:
   image:
     Contract: $.string().notNull()
   agent:
-    Contract: $.class(sys:Agent)
+    Contract: $.class(sys:SshAgent)
     Usage: Runtime
   ipAddresses:
     Contract: [$.string()]
@@ -32,19 +32,16 @@ Methods:
       - $.instanceTemplate: {}
       - $._floatingIpOutputName: null
       - $.node: null
-      - $.agent: new(sys:Agent, host => $)
+      - $.agent: new(sys:SshAgent, host => $)
 
   deploy:
     Arguments:
       plan:
         Contract: {}
     Body:
-      - If: not $.node
-        Then:
-          - $.driver: new(sys:AWSBinding)
-          - $.node: $.driver.deploynode($plan,$.image,$.name)
-        Else:
-          - $.driver.runscripts($.node,$plan)
+      - $.driver: new(sys:AWSBinding)
+      - $.node: $.driver.createnode($.image,$.name)
+      - $.agent.setnode($.node)
   destroy:
     Body:
       - $.driver.destroynode($.node)
