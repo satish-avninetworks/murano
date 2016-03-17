@@ -20,7 +20,7 @@ LOG = logging.getLogger(__name__)
 class AWSBinding(object):
     def __init__(self):
         self.cls = get_driver(Provider.EC2)
-        self.driver = self.cls('userID','password',region="us-west-1")
+        self.driver = self.cls('AcessID','SecretKey',region="us-west-1")
 
     def createnode(self,name):
         images = NodeImage(id='imageID',name=None,driver=self.driver)
