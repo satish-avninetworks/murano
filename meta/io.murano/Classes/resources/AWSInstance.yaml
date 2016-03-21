@@ -45,5 +45,7 @@ Methods:
       - $.agent.setnode($.node)
   destroy:
     Body:
+      - $.driver: new(sys:AWSBinding)
       - $.driver.destroynode($.node)
+      - $.node: null
 
