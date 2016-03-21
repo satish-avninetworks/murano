@@ -48,7 +48,7 @@ def upgrade():
         sa.Column('key', sa.Text(), nullable=True),
         sa.Column('private_key', sa.Text(), nullable=True),
         sa.Column('endpoint', sa.Text(), nullable=True),
-        sa.Column('option', sa.Text(), nullable=True),
+        sa.Column('options', sa.Text(), nullable=True),
         sa.PrimaryKeyConstraint('id'),
         sa.UniqueConstraint('tenant_id', 'name'),
         mysql_engine=MYSQL_ENGINE,
