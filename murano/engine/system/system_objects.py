@@ -15,15 +15,15 @@
 
 from murano.engine.system import agent
 from murano.engine.system import agent_listener
-from murano.engine.system import heat_stack
 from murano.engine.system import AWSBinding
-from murano.engine.system import SSHAgent
+from murano.engine.system import heat_stack
 from murano.engine.system import instance_reporter
 from murano.engine.system import logger
 from murano.engine.system import mistralclient
 from murano.engine.system import net_explorer
 from murano.engine.system import resource_manager
 from murano.engine.system import status_reporter
+from murano.engine.system import SSHAgent
 
 
 def register(package):

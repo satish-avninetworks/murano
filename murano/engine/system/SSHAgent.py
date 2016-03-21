@@ -14,7 +14,6 @@
 # limitations under the License.
 
 import copy
-import datetime
 import os
 import types
 import urlparse
@@ -23,13 +22,11 @@ import uuid
 from yaql import specs
 
 from murano.dsl import dsl
-import murano.engine.system.common as common
-import murano.engine.system.AWSBinding as AWSBinding
 from libcloud.compute.deployment import ScriptDeployment
-from libcloud.compute.deployment import MultiStepDeployment, SSHKeyDeployment
-from libcloud.compute.ssh import SSHClient
-from oslo_log import log as logging
+from libcloud.compute.deployment import MultiStepDeployment
+from libcloud.compute.deployment import SSHKeyDeployment
 from oslo_config import cfg
+from oslo_log import log as logging
 
 LOG = logging.getLogger(__name__)
 CONF = cfg.CONF
@@ -49,7 +46,7 @@ class SSHAgent(object):
         self._queue = str('e%s-h%s' % (
             self._environment.id, host.id)).lower()
 
-    def setnode(self,node):
+    def setnode(self, node):
         self.node = node
 
     def _get_environment(self, interfaces, host):
@@ -74,24 +71,25 @@ class SSHAgent(object):
         self._check_enabled()
         plan = self.build_execution_plan(template, resources())
         if self.node:
-           self.runscripts(self.node,plan)
-    def runscripts(self,node, plan):
+            self.runscripts(self.node, plan)
+
+    def runscripts(self, node, plan):
         ssh_keypath = os.path.expanduser('~/.ssh/id_rsa')
-        with open(ssh_keypath+".pub") as f:
+        with open(ssh_keypath + ".pub") as f:
             public_key = f.read()
 
         key = SSHKeyDeployment(public_key)
-        script = ScriptDeployment(plan['Files'].values()[0]['Body'],args=[str(x) for x in plan['Parameters'].values()])
-        msd = MultiStepDeployment([key,script])
+        script = ScriptDeployment(plan['Files'].values()[0]['Body'], args=[str(x) for x in plan['Parameters'].values()])
+        msd = MultiStepDeployment([key, script])
 
-        #Create the SSH client and push the script
+        # Create the SSH client and push the script
         try:
            node.driver._connect_and_run_deployment_script(
                         task=msd, node=node,
                         ssh_hostname=node.public_ips[0], ssh_port=22,
                         ssh_username='ubuntu',
                         ssh_key_file=ssh_keypath, ssh_timeout=1800,
-                        timeout=300, max_tries=3,ssh_password='avni1234')
+                        timeout=300, max_tries=3, ssh_password='avni1234')
         except Exception:
             print("Unable to run scripts on this driver")
 

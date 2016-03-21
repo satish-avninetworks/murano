@@ -21,7 +21,7 @@ Classes:
   io.murano.StackTrace: StackTrace.yaml
   io.murano.SharedIp: SharedIp.yaml
   io.murano.File: File.yaml
-
+  io.murano.AWSCloud: AWSCloud.yaml
 
   io.murano.configuration.Linux: configuration/Linux.yaml
 

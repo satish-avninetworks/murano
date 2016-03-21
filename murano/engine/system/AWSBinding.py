@@ -13,21 +13,15 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import eventlet
 import os
-import heatclient.exc as heat_exc
 from oslo_log import log as logging
-from murano.common.i18n import _LW
-from murano.common import utils
 from murano.dsl import dsl
-from murano.dsl import helpers
-from pprint import pprint
 from libcloud.compute.types import Provider
 from libcloud.compute.providers import get_driver
 from libcloud.compute.base import NodeImage
 from libcloud.compute.deployment import ScriptDeployment
-from libcloud.compute.deployment import MultiStepDeployment, SSHKeyDeployment
-from libcloud.compute.base import NodeAuthSSHKey
+from libcloud.compute.deployment import MultiStepDeployment
+from libcloud.compute.deployment import SSHKeyDeployment
 LOG = logging.getLogger(__name__)
 
 
@@ -35,10 +29,10 @@ LOG = logging.getLogger(__name__)
 class AWSBinding(object):
     def __init__(self):
         self.cls = get_driver(Provider.EC2)
-        self.driver = self.cls('AKIAIETZPSM636GLXORA','rOLla8GFbmAB16Zi3TMzOMgoeoicrB7BUY0nOmg+',region="us-west-1")
+        self.driver = self.cls('AKIAIETZPSM636GLXORA','rOLla8GFbmAB16Zi3TMzOMgoeoicrB7BUY0nOmg+', region="us-west-1")
 
-    def createnode(self,image,name):
-        images = NodeImage(id='ami-0bb6454f',name=None,driver=self.driver)
+    def createnode(self, image, name):
+        images = NodeImage(id='ami-0bb6454f', name=None,driver=self.driver)
         sizes = self.driver.list_sizes()
         node = self.driver.create_node(name=name,image=images,size=sizes[0])
         # Wait until node is up and running and has IP assigned
@@ -48,22 +42,24 @@ class AWSBinding(object):
             print("Unable to ping the node, TODO how to handle this")
 
         return node
-    def getpublicips(self,node):
+
+    def getpublicips(self, node):
         return node.public_ips
-    def destroynode(self,node):
+
+    def destroynode(self, node):
         self.driver.destroy_node(node)
   
-    def deploynode(self,plan,imageid,name):
+    def deploynode(self, plan, imageid, name):
         ssh_keypath = os.path.expanduser('~/.ssh/id_rsa')
         with open(ssh_keypath+".pub") as f:
             public_key = f.read()
         key = SSHKeyDeployment(public_key)
-        images = NodeImage(id=imageid,name=None,driver=self.driver)
+        images = NodeImage(id=imageid, name=None, driver=self.driver)
         sizes = self.driver.list_sizes()
         script = ScriptDeployment(plan['Files'].values()[0]['Body'],args=[str(x) for x in plan['Parameters'].values()])
-        msd = MultiStepDeployment([key,script])
+        msd = MultiStepDeployment([key, script])
         try:
-            node = self.driver.deploy_node(name=name,image=images,size=sizes[0],ssh_key=ssh_keypath,ssh_username='ubuntu',deploy=msd,timeout=1800,ex_keyname="avni_key")
+            node = self.driver.deploy_node(name=name, image=images, size=sizes[0], ssh_key=ssh_keypath, ssh_username='ubuntu', deploy=msd, timeout=1800, ex_keyname="avni_key")
         except NotImplementedError:
             print("Deploy Node is not implemented for this driver")
         return node
