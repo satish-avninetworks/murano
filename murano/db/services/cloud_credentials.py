@@ -37,7 +37,7 @@ class CloudCredentialServices(object):
         return cloud_credentials
 
     @staticmethod
-    def create(params, tenant_id):
+    def create(params, context):
         """Creates Cloud Credentials with specified params, in particular -
         name.
 
@@ -46,7 +46,7 @@ class CloudCredentialServices(object):
            :return: Created Cloud Credential
         """
         params['id'] = uuidutils.generate_uuid()
-        params['tenant_id'] = tenant_id
+        params['tenant_id'] = context.tenant
         cloud_credential = models.CloudCredentials()
         cloud_credential.update(params)
 

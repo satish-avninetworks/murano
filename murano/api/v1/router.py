@@ -258,17 +258,21 @@ class API(wsgi.Router):
                        conditions={'method': ['DELETE']})
 
         cloud_credential_resource = cloud_credentials.create_resource()
-        mapper.connect('/identity/cloudcredntial/{category_id}',
+        mapper.connect('/identity/cloudcredential',
                        controller=cloud_credential_resource,
-                       action='get_category',
+                       action='index',
                        conditions={'method': ['GET']})
-        mapper.connect('/identity/cloudcredntial/',
+        mapper.connect('/identity/cloudcredential/{cloud_cred_id}',
                        controller=cloud_credential_resource,
-                       action='add_category',
+                       action='show',
+                       conditions={'method': ['GET']})
+        mapper.connect('/identity/cloudcredential',
+                       controller=cloud_credential_resource,
+                       action='create',
                        conditions={'method': ['POST']})
-        mapper.connect('/identity/cloudcredntial/{category_id}',
+        mapper.connect('/identity/cloudcredential/{cloud_cred_id}',
                        controller=cloud_credential_resource,
-                       action='delete_category',
+                       action='delete',
                        conditions={'method': ['DELETE']})
         req_stats_resource = request_statistics.create_resource()
         mapper.connect('/stats',

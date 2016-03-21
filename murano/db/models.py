@@ -377,7 +377,7 @@ class CloudCredentials(Base, TimestampMixin):
     key = sa.Column(EncryptedType(sa.String, secret_key))
     private_key = sa.Column(EncryptedType(sa.String, secret_key))
     endpoint = sa.Column(sa.String(255), nullable=False)
-    option = sa.Column(st.JsonBlob(), nullable=False, default={})
+    options = sa.Column(st.JsonBlob(), nullable=True, default={})
 
     def to_dict(self):
         dictionary = super(CloudCredentials, self).to_dict()

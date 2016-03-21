@@ -47,8 +47,9 @@ class Controller(object):
             policy.check('list_cloud_credentials_all_tenants', request.context)
             filters = {}
         else:
-            policy.check('list_environments', request.context)
-            # Only environments from same tenant as user should be returned
+            policy.check('list_cloud_credentials', request.context)
+            # Only cloud credentials from same tenant as user
+            # should be returned
             filters = {'tenant_id': request.context.tenant}
 
         cloudCredentials = cloud_credentials.CloudCredentialServices.\
@@ -74,7 +75,7 @@ class Controller(object):
             raise exc.HTTPBadRequest(explanation=msg)
         if VALID_NAME_REGEX.match(name):
             try:
-                environment = cloud_credentials.CloudCredentialServices.create(
+                cloud_cred_obj = cloud_credentials.CloudCredentialServices.create(
                     body.copy(),
                     request.context)
             except db_exc.DBDuplicateEntry:
@@ -87,13 +88,13 @@ class Controller(object):
             LOG.exception(msg)
             raise exc.HTTPClientError(explanation=msg)
 
-        return environment.to_dict()
+        return cloud_cred_obj.to_dict()
 
     @request_statistics.stats_count(API_NAME, 'Show')
     def show(self, request, cloud_cred_id):
         LOG.debug('CloudCredentials:Show <Id: {id}>'.format(id=cloud_cred_id))
         target = {"cloud_credential_id": cloud_cred_id}
-        policy.check('show_cloud_credential', request.context, target)
+        policy.check('show_cloud_credentials', request.context, target)
 
         session = db_session.get_session()
         credential = session.query(models.CloudCredentials).get(cloud_cred_id)
@@ -104,7 +105,7 @@ class Controller(object):
         LOG.debug('CloudCredentials:Update <Id: {id}, '
                   'Body: {body}>'.format(id=cloud_cred_id, body=body))
         target = {"cloud_credential_id": cloud_cred_id}
-        policy.check('update_cloud_credential', request.context, target)
+        policy.check('update_cloud_credentials', request.context, target)
 
         self._validate_request(request, cloud_cred_id)
 
@@ -119,7 +120,7 @@ class Controller(object):
                 LOG.error(msg)
                 raise exc.HTTPConflict(explanation=msg)
         else:
-            msg = _('Environment name must contain only alphanumeric '
+            msg = _('Cloud Credential name must contain only alphanumeric '
                     'or "_-." characters, must start with alpha')
             LOG.error(msg)
             raise exc.HTTPClientError(explanation=msg)
@@ -131,16 +132,16 @@ class Controller(object):
         LOG.debug('CloudCredentials:Delete <Id: {id}>'.format(id=cloud_cred_id)
                   )
         target = {"cloud_credential_id": cloud_cred_id}
-        policy.check('delete_cloud_credential', request.context, target)
+        policy.check('delete_cloud_credentials', request.context, target)
         self._validate_request(request, cloud_cred_id)
         cloud_credentials.CloudCredentialServices.remove(cloud_cred_id)
 
     @request_statistics.stats_count(API_NAME, 'LastStatus')
-    def last(self, request, environment_id):
+    def last(self, request, cloud_cred_id):
         session_id = None
         if hasattr(request, 'context') and request.context.session:
             session_id = request.context.session
-        services = core_services.CoreServices.get_data(environment_id,
+        services = core_services.CoreServices.get_data(cloud_cred_id,
                                                        '/services',
                                                        session_id)
         session = db_session.get_session()
