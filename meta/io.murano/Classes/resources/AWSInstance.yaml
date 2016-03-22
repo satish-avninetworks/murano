@@ -26,9 +26,7 @@ Properties:
     Contract: $.string()
     Usage: Out
   flavor:
-    Contract: $.string()
-    Usage: Runtime
-
+    Contract: $.string().notNull()
 
 Methods:
   initialize:
@@ -49,7 +47,6 @@ Methods:
            - $cloudid: $.cloudid
         Else:
            - $cloudid: $.environment.defaultCloud
-      - $.environment.reporter.report($, format('Creating VM for Apache Server {0} {1}', $.cloudid, $cloudid))
       - $.cloud: new(sys:Cloud, cloudid => $cloudid)
       - $.agent: new(sys:SSHAgent, host => $,cloud=>$.cloud)
       - $.driver: new(sys:AWSBinding,cloud => $.cloud.getCredentials())
