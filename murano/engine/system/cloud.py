@@ -24,7 +24,7 @@ LOG = logging.getLogger(__name__)
 @dsl.name('io.murano.system.Cloud')
 class Cloud(object):
     def __init__(self, cloud_id):
-        credential = muranoclient.cloud_credentials.get(cloud_id)
+        self.credentials = muranoclient.cloud_credentials.get(cloud_id)
 
 
 

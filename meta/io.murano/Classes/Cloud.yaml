@@ -3,7 +3,7 @@ Namespaces:
     res: io.murano.resources
     sys: io.murano.system
 
-Name: AWSCloud
+Name: Cloud
 
 Properties:
 
