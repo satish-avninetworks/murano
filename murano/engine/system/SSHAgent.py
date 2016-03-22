@@ -34,13 +34,14 @@ CONF = cfg.CONF
 
 @dsl.name('io.murano.system.SSHAgent')
 class SSHAgent(object):
-    def __init__(self, interfaces, host):
+    def __init__(self, interfaces, host,cloud):
         self._enabled = False
         if CONF.engine.disable_murano_agent:
             LOG.debug('Use of murano-agent is disallowed '
                       'by the server configuration')
             return
 
+        self.cloud = cloud
         self._environment = self._get_environment(interfaces, host)
         self._enabled = True
         self._queue = str('e%s-h%s' % (
@@ -74,12 +75,21 @@ class SSHAgent(object):
             self.runscripts(self.node, plan)
 
     def runscripts(self, node, plan):
+        #TODO: Read from id mgmt
         ssh_keypath = os.path.expanduser('~/.ssh/id_rsa')
         with open(ssh_keypath + ".pub") as f:
             public_key = f.read()
 
         key = SSHKeyDeployment(public_key)
-        script = ScriptDeployment(plan['Files'].values()[0]['Body'], args=[str(x) for x in plan['Parameters'].values()])
+        #Get the argument keys
+        body = plan['Body'].split('.format(')[-1]
+        keys = ','+body.split(')).stdout')[0]
+        keys = filter(None,keys.split(',args.'))
+        params = []
+        for k in keys:
+            params.append(str(plan['Parameters'][k]))
+
+        script = ScriptDeployment(plan['Files'].values()[0]['Body'], args=params)
         msd = MultiStepDeployment([key, script])
 
         # Create the SSH client and push the script

@@ -32,18 +32,21 @@ Methods:
       - $.instanceTemplate: {}
       - $._floatingIpOutputName: null
       - $.node: null
-      - $.agent: new(sys:SSHAgent, host => $)
+      - $.cloud: new(sys:Cloud,id=>$.cloudid)
+      - $.agent: new(sys:SSHAgent, host => $,cloud=>$.cloud)
 
   deploy:
     Arguments:
       plan:
         Contract: {}
     Body:
-      - $.driver: new(sys:AWSBinding)
-      - $.node: $.driver.createnode($.image,$.name)
+      - $.driver: new(sys:AWSBinding,$.cloud)
+      - $.node: $.driver.createnode($.image,$.flavor,$.name)
       - $.ipAddresses: $.driver.getpublicips($.node)
       - $.agent.setnode($.node)
   destroy:
     Body:
+      - $.driver: new(sys:AWSBinding)
       - $.driver.destroynode($.node)
+      - $.node: null
 
