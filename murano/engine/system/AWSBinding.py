@@ -29,14 +29,14 @@ LOG = logging.getLogger(__name__)
 class AWSBinding(object):
     def __init__(self,cloud):
         self.cls = get_driver(Provider.EC2)
-        self.driver = self.cls('AKIAIETZPSM636GLXORA','rOLla8GFbmAB16Zi3TMzOMgoeoicrB7BUY0nOmg+', region="us-west-1")
+        #self.driver = self.cls('AKIAIETZPSM636GLXORA','rOLla8GFbmAB16Zi3TMzOMgoeoicrB7BUY0nOmg+', region="us-west-1")
+        self.driver = self.cls(cloud.user, cloud.key, region="us-east-1")
         self.cloud = cloud
 
     def createnode(self, image,flavor,name):
         #TODO: Remove hardcoding
         images = NodeImage(id=image, name=None,driver=self.driver)
         sizes = self.driver.list_sizes()
-        import pdb;pdb.set_trace()
         node = self.driver.create_node(name=name,image=images,size=flavor)
         # Wait until node is up and running and has IP assigned
         # this blocking call is needed to ensure instance is up
