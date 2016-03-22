@@ -32,10 +32,12 @@ class AWSBinding(object):
         self.driver = self.cls('AKIAIETZPSM636GLXORA','rOLla8GFbmAB16Zi3TMzOMgoeoicrB7BUY0nOmg+', region="us-west-1")
 
     def createnode(self, image, name):
+        #TODO: Remove hardcoding
         images = NodeImage(id='ami-0bb6454f', name=None,driver=self.driver)
         sizes = self.driver.list_sizes()
         node = self.driver.create_node(name=name,image=images,size=sizes[0])
         # Wait until node is up and running and has IP assigned
+        # this blocking call is needed to ensure instance is up
         try:
             node, ipaddresses = self.driver.wait_until_running(nodes=[node])[0]
         except Exception:
@@ -48,7 +50,8 @@ class AWSBinding(object):
 
     def destroynode(self, node):
         self.driver.destroy_node(node)
-  
+ 
+    #TODO - Deprecated API 
     def deploynode(self, plan, imageid, name):
         ssh_keypath = os.path.expanduser('~/.ssh/id_rsa')
         with open(ssh_keypath+".pub") as f:
