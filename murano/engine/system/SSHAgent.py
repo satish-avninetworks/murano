@@ -34,13 +34,14 @@ CONF = cfg.CONF
 
 @dsl.name('io.murano.system.SSHAgent')
 class SSHAgent(object):
-    def __init__(self, interfaces, host):
+    def __init__(self, interfaces, host,cloud):
         self._enabled = False
         if CONF.engine.disable_murano_agent:
             LOG.debug('Use of murano-agent is disallowed '
                       'by the server configuration')
             return
 
+        self.cloud = cloud
         self._environment = self._get_environment(interfaces, host)
         self._enabled = True
         self._queue = str('e%s-h%s' % (
