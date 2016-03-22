@@ -10,257 +10,28 @@ Name: Instance
 Properties:
   name:
     Contract: $.string().notNull()
-  flavor:
-    Contract: $.string().notNull()
-  image:
-    Contract: $.string().notNull()
-  keyname:
-    Contract: $.string()
-    Default: null
-  openstackId:
-    Contract: $.string()
-    Usage: Out
-  availabilityZone:
-    Contract: $.string().notNull()
-    Default: nova
   agent:
     Contract: $.class(sys:Agent)
     Usage: Runtime
-  ipAddresses:
-    Contract: [$.string()]
-    Usage: Out
-  networks:
-    Contract:
-      useEnvironmentNetwork: $.bool().notNull()
-      useFlatNetwork: $.bool().notNull()
-      customNetworks: [$.class(Network).notNull()]
-      primaryNetwork: $.class(Network).notOwned()
-    Default:
-      useEnvironmentNetwork: true
-      useFlatNetwork: false
-      customNetworks: []
-      primaryNetwork: null
   assignFloatingIp:
     Contract: $.bool().notNull()
     Default: false
   floatingIpAddress:
     Contract: $.string()
     Usage: Out
-  securityGroupName:
-    Contract: $.string()
-    Default: null
-  sharedIps:
-    Contract:
-      - $.class(std:SharedIp)
-    Usage: InOut  # as it is set in setSharedIps
+  ipAddresses:
+    Contract: [$.string()]
+    Usage: Out
+  image:
+    Contract: $.string().notNull()
+  cloudid:
+    Contract: $.string().notNull()
+  cloud:
+    Contract: $.class(sys:Cloud)
 
 Methods:
   initialize:
-    Body:
-      - $.environment: $.find(std:Environment).require()
-      - $.agent: new(sys:Agent, host => $)
-      - $.resources: new(sys:Resources)
-      - $.instanceTemplate: {}
-      - $._floatingIpOutputName: null
-
-  # Called after the Instance template pieces are in place. It
-  # is at this stage alterations to the template should be made
-  prepareStackTemplate:
-    Arguments:
-      instanceTemplate:
-        Contract: {}
-    Body:
-      - Return: $instanceTemplate
-
-  setSharedIps:
-    Arguments:
-      ips:
-        Contract:
-          - $.class(std:SharedIp)
-    Body:
-      $.sharedIps: $ips
 
   deploy:
-    Body:
-      - $securityGroupName: coalesce(
-            $.securityGroupName,
-            $.environment.securityGroupManager.defaultGroupName
-          )
-      - $.createDefaultInstanceSecurityGroupRules($securityGroupName)
-      - $.detectPrimaryNetwork()
-      - $.ensureSharedIpsDeployed()
-      - $.ensureNetworksDeployed()
-      - If: $.networks.useEnvironmentNetwork and $.environment.defaultNetworks.environment!=null
-        Then:
-          $.joinNet($.environment.defaultNetworks.environment, $securityGroupName)
-      - If: $.networks.useFlatNetwork and $.environment.defaultNetworks.flat!=null
-        Then:
-          $.joinNet($.environment.defaultNetworks.flat, $securityGroupName)
-      - $.networks.customNetworks.select($this.joinNet($, $securityGroupName))
-
-      - $preparedUserData: $.prepareUserData()
-      - $userData: $preparedUserData.data
-      - $userDataFormat: $preparedUserData.format
-      # Create MQ queue to communicate with the VM
-      - $.agent.prepare()
-      - $template:
-          resources:
-            $.name:
-              type: 'OS::Nova::Server'
-              properties:
-                flavor: $.flavor
-                image: $.image
-                availability_zone: $.availabilityZone
-                user_data: $userData
-                user_data_format: $userDataFormat
-                key_name: $.keyname
-          outputs:
-            format('{0}-assigned-ips', $.name):
-              description: format('Network IPs assigned to {0} instance', $.name)
-              value:
-                get_attr: [ $.name, networks ]
-            format('{0}-id', $.name):
-              description: format('ID of {0} instance', $.name)
-              value:
-                get_resource: $.name
-
-      - $.instanceTemplate: $.instanceTemplate.mergeWith($template)
-
-      # Any additional template preparation
-      - $.instanceTemplate: $.prepareStackTemplate($.instanceTemplate)
-      - $.environment.stack.updateTemplate($.instanceTemplate)
-      - $.environment.stack.push()
-      - $outputs: $.environment.stack.output()
-      - $.ipAddresses: $outputs.get(format('{0}-assigned-ips', $this.name)).values().flatten().distinct()
-      - $.openstackId: $outputs.get(format('{0}-id', $this.name))
-      - If: $._floatingIpOutputName != null
-        Then:
-          - $.floatingIpAddress: $outputs.get($._floatingIpOutputName)
-          - If: $.floatingIpAddress != null
-            Then: $.setAttr(fipAssigned, true)
-      - $.environment.instanceNotifier.trackCloudInstance($this)
-
-  detectPrimaryNetwork:
-    Body:
-      - $._primaryNetwork: null
-      - If: $.networks.primaryNetwork != null
-        Then:
-          - $._primaryNetwork: $.networks.primaryNetwork
-        Else:
-          - If: $.networks.useEnvironmentNetwork and $.environment.defaultNetworks.environment!=null
-            Then:
-              - $._primaryNetwork: $.environment.defaultNetworks.environment
-            Else:
-              - If: $.networks.useFlatNetwork and $.environment.defaultNetworks.flat!=null
-                Then:
-                  - $._primaryNetwork: $.environment.defaultNetworks.flat
-                Else:
-                  - If: $.networks.customNetworks!= null
-                    Then:
-                      - $._primaryNetwork: $.networks.customNetworks.firstOrDefault()
-
-  ensureNetworksDeployed:
-    Body:
-      - If: $.networks.useEnvironmentNetwork and $.environment.defaultNetworks.environment!=null
-        Then:
-          - $.environment.defaultNetworks.environment.deploy()
-      - If: $.networks.useFlatNetwork and $.environment.defaultNetworks.flat!=null
-        Then:
-          - $.environment.defaultNetworks.flat.deploy()
-      - $.networks.customNetworks.pselect($.deploy())
-
-  ensureSharedIpsDeployed:
-    Body:
-      - $.sharedIps.pselect($.deploy())
-
-  joinNet:
-    Arguments:
-      - net:
-          Contract: $.class(Network).notNull()
-      - securityGroupName:
-          Contract: $.string()
-    Body:
-      - $primary: $net = $._primaryNetwork
-      - $assignFip: $primary and $.assignFloatingIp and not $.getAttr(fipAssigned, false)
-      - $sharedIps: []
-      - If: $primary
-        Then:
-          $sharedIps: $.sharedIps
-      - $joinResult: $net.joinInstance(
-            instance => $this,
-            securityGroupName => $securityGroupName,
-            assignFloatingIp => $assignFip,
-            sharedIps => $sharedIps
-          )
-      - $.setAttr(instanceResources, $.getAttr(instanceResources, []).concat($joinResult.get(instanceResources, [])))
-      - $.setAttr(instanceOutputs, $.getAttr(instanceOutputs, []).concat($joinResult.get(instanceOutputs, [])))
-
-      - If: $joinResult.template != null
-        Then:
-          - $.instanceTemplate: $.instanceTemplate.mergeWith($joinResult.template)
-
-      - If: $joinResult.portRef != null
-        Then:
-          - $template:
-              resources:
-                $.name:
-                  properties:
-                    networks:
-                      - port:
-                          $joinResult.portRef
-          - $.instanceTemplate: $.instanceTemplate.mergeWith($template)
-      - If: $joinResult.secGroupName != null
-        Then:
-          - $template:
-              resources:
-                $.name:
-                  properties:
-                    security_groups:
-                      - $joinResult.secGroupName
-          - $.instanceTemplate: $.instanceTemplate.mergeWith($template)
-
-      - $._floatingIpOutputName: coalesce($._floatingIpOutputName, $joinResult.instanceFipOutput)
-
-  releaseResources:
-    Body:
-      - $template: $.environment.stack.current()
-      - If: bool($template.resources) and bool($template.outputs)
-        Then:
-          - $resourcesToDelete: list($.name).concat($.getAttr(instanceResources, []))
-          - $lenBefore: len($template.resources)
-          - $template.resources: $template.resources.deleteAll($resourcesToDelete)
-          - If: $lenBefore > len($template.resources)
-            Then:
-              - $.environment.instanceNotifier.untrackCloudInstance($this)
-
-          - $outputsToDelete: list(
-              '{0}-assigned-ips'.format($.name),
-              '{0}-id'.format($.name)).concat($.getAttr(instanceOutputs, []))
-          - $template.outputs: $template.outputs.deleteAll($outputsToDelete)
-
-          - $.environment.stack.setTemplate($template)
-          - $.environment.stack.push()
-      - $.setAttr(instanceResources, [])
-      - $.setAttr(instanceOutputs, [])
 
   destroy:
-    Body:
-      - $.releaseResources()
-
-
-  createDefaultInstanceSecurityGroupRules:
-    Arguments:
-      - groupName:
-          Contract: $.string().notNull()
-
-  prepareUserData:
-    Body:
-      Return:
-        data: null
-        # Valid values are HEAT_CFNTOOLS, RAW and SOFTWARE_CONFIG
-        format: HEAT_CFNTOOLS
-
-  isDeployed:
-    Body:
-      - $template: $.environment.stack.current()
-      - Return: $template.resources != null and $.name in $template.resources
