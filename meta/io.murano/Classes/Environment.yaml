@@ -41,12 +41,11 @@ Properties:
   defaultCloud:
     Contract: $.string()
     Usage: Runtime
-    Default: Null
+
 Methods:
   initialize:
     Body:
       - $generatedEnvironmentName: $.getAttr(generatedEnvironmentName)
-      - $this.defaultCloud: null
       - If: $generatedEnvironmentName = null
         Then:
           - $generatedEnvironmentName: randomName()
