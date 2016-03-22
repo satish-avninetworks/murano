@@ -5,10 +5,3 @@ Namespaces:
 
 Name: Cloud
 
-Properties:
-
-  id:
-    Contract: $.string()
-  credentials:
-
-Methods:

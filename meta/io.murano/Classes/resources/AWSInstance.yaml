@@ -34,12 +34,6 @@ Methods:
       - $.instanceTemplate: {}
       - $._floatingIpOutputName: null
       - $.node: null
-      - If: $.getAttr(cloudid, false)
-        Then:
-            $cloud_id: $.cloudid
-        Else:
-            $cloud_id: $.environment.defaultCloud
-      - $.cloud: new(sys:Cloud,id=>$cloud_id)
       - $.agent: new(sys:SSHAgent, host => $,cloud=>$.cloud)
 
   deploy:
@@ -47,6 +41,7 @@ Methods:
       plan:
         Contract: {}
     Body:
+      - $.cloud: new(sys:Cloud, cloud_id => "a25d93ca78de4db098fe169f449a442c")
       - $.driver: new(sys:AWSBinding,$.cloud.credentials)
       - $.node: $.driver.createnode($.image,$.flavor,$.name)
       - $.ipAddresses: $.driver.getpublicips($.node)
