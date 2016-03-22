@@ -7,16 +7,7 @@ Name: AWSCloud
 
 Properties:
 
-  userid:
-    Contract: $.string().notNull()
-
-  key:
-    Contract: $.string().notNull()
-
-  provider: 
-    Contract: $.string().notNull()
-
-  region: 
+  id:
     Contract: $.string().notNull()
 
 Methods:
