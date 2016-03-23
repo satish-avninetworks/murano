@@ -38,6 +38,9 @@ Properties:
     Contract: $.class(sys:StatusReporter)
     Usage: Runtime
 
+  defaultCloud:
+    Contract: $.string()
+    Usage: Runtime
 Methods:
   initialize:
     Body:
