@@ -38,6 +38,7 @@ Classes:
   io.murano.resources.ExistingNeutronNetwork: resources/ExistingNeutronNetwork.yaml
   io.murano.resources.NovaNetwork: resources/NovaNetwork.yaml
   io.murano.resources.AWSInstance: resources/AWSInstance.yaml
+  io.murano.resources.OpenStackInstance: resources/OpenStackInstance.yaml
 
   io.murano.system.Agent: system/Agent.yaml
   io.murano.system.AgentListener: system/AgentListener.yaml
