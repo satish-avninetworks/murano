@@ -16,6 +16,7 @@
 from murano.engine.system import agent
 from murano.engine.system import agent_listener
 from murano.engine.system import AWSBinding
+from murano.engine.system import Cloud
 from murano.engine.system import heat_stack
 from murano.engine.system import instance_reporter
 from murano.engine.system import logger
