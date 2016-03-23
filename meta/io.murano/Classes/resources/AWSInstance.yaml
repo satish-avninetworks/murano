@@ -40,7 +40,7 @@ Methods:
       plan:
         Contract: {}
     Body:
-      - $.driver: new(sys:AWSBinding,$.cloud)
+      - $.driver: new(sys:AWSBinding,$.cloud.credentials)
       - $.node: $.driver.createnode($.image,$.flavor,$.name)
       - $.ipAddresses: $.driver.getpublicips($.node)
       - $.agent.setnode($.node)
