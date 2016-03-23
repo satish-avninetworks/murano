@@ -34,12 +34,12 @@ Methods:
       - $.instanceTemplate: {}
       - $._floatingIpOutputName: null
       - $.node: null
-      - If: $.getAttr(cloudid, false)
+      - If: $.cloudid != null
         Then:
-            $cloud_id: $.cloudid
+           - $cloud_id: $.cloudid
         Else:
-            $cloud_id: $.environment.defaultCloud
-      - $.cloud: new(sys:Cloud,id=>$cloud_id)
+           - $cloud_id: $.environment.defaultCloud
+      - $.cloud: new(sys:Cloud,$cloud_id)
       - $.agent: new(sys:SSHAgent, host => $,cloud=>$.cloud)
 
   deploy:
