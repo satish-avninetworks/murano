@@ -8,6 +8,6 @@ Name: Cloud
 Properties:
 
   id:
-    Contract: $.string().notNull()
+    Contract: $.string()
 
 Methods:
