@@ -6,6 +6,8 @@ Namespaces:
 
 Name: AWSInstance
 
+Extends: Instance
+
 Properties:
   name:
     Contract: $.string().notNull()
