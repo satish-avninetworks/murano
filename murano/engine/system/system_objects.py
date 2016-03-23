@@ -38,3 +38,4 @@ def register(package):
     package.register_class(net_explorer.NetworkExplorer)
     package.register_class(logger.Logger)
     package.register_class(SSHAgent.SSHAgent)
+    package.register_class(Cloud.Cloud)
