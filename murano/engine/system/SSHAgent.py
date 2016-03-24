@@ -15,9 +15,11 @@
 
 import copy
 import os
+import re
 import types
 import urlparse
 import uuid
+
 
 from yaql import specs
 
@@ -81,14 +83,10 @@ class SSHAgent(object):
 
         key = SSHKeyDeployment(public_key)
         #Get the argument keys
-        body = plan['Body'].split('.format(')[-1]
-        keys = ','+body.split(')).stdout')[0]
-        keys = filter(None,keys.split(',args.'))
-        params = []
-        for k in keys:
-            params.append(str(plan['Parameters'][k]))
-
-        script = ScriptDeployment(plan['Files'].values()[0]['Body'], args=params)
+        params = [ str(plan['Parameters'].get(x,None)) for x in
+                   re.findall(r"args.(\w+)",plan['Body']) ]
+        script = ScriptDeployment(plan['Files'].values()[0]['Body'],
+                                  args=params)
         msd = MultiStepDeployment([key, script])
 
         # Create the SSH client and push the script
