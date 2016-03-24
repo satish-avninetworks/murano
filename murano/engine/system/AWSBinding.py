@@ -30,8 +30,7 @@ class AWSBinding(object):
     def __init__(self,cloud):
         self.cls = get_driver(Provider.EC2)
         #self.driver = self.cls('AKIAIETZPSM636GLXORA','rOLla8GFbmAB16Zi3TMzOMgoeoicrB7BUY0nOmg+', region="us-west-1")
-        import pdb;pdb.set_trace()
-        self.driver = self.cls(cloud.user, cloud.key, region="us-east-1")
+        self.driver = self.cls(cloud.user, cloud.key, region="us-west-1")
         self.cloud = cloud
 
     def createnode(self, image,flavor,name):
