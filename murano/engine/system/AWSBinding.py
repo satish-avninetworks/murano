@@ -35,8 +35,6 @@ class AWSBinding(object):
         self.cloud = cloud
 
     def createnode(self, image,flavor,name):
-        #TODO: Remove hardcoding
-        import pdb;pdb.set_trace()
         images = NodeImage(id=image, name=None,driver=self.driver)
         sizes = self.driver.list_sizes()
         size = [s for s in sizes if s.id == flavor][0]
