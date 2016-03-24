@@ -37,7 +37,7 @@ class AWSBinding(object):
         #TODO: Remove hardcoding
         images = NodeImage(id=image, name=None,driver=self.driver)
         sizes = self.driver.list_sizes()
-        node = self.driver.create_node(name=name,image=images,size=flavor)
+        node = self.driver.create_node(name=name,image=images,size = [s for s in sizes if s.id == flavor][0])
         # Wait until node is up and running and has IP assigned
         # this blocking call is needed to ensure instance is up
         try:
