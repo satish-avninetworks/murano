@@ -45,9 +45,8 @@ Methods:
            - $cloudid: $.cloudid
         Else:
            - $cloudid: $.environment.defaultCloud
-      - $.environment.reporter.report($, 'Creating VM for Apache Server sdfsdfsdfsdf ')
-      - $.cloud: new(sys:Cloud, cloudid => "a25d93ca78de4db098fe169f449a442c")
-      - $.agent: new(sys:SSHAgent, host => $,cloud=>$.cloud)
+      - $.cloud: new(sys:Cloud, cloudid => $cloudid)
+      - $.agent: new(sys:SSHAgent, host => $)
       - $.driver: new(sys:AWSBinding,cloud => $.cloud.getCredentials())
       - $.node: $.driver.createnode($.image,"t1.micro",$.name)
       - $.ipAddresses: $.driver.getpublicips($.node)

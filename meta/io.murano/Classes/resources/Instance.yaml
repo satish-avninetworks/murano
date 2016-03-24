@@ -26,6 +26,8 @@ Properties:
   cloud:
     Contract: $.class(sys:Cloud)
     Usage: Runtime
+  flavor:
+    Contract: $.string().notNull()
 
 Methods:
   initialize:
