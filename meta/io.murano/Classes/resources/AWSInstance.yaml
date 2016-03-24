@@ -34,21 +34,22 @@ Methods:
       - $.instanceTemplate: {}
       - $._floatingIpOutputName: null
       - $.node: null
-      - If: $.getAttr(cloudid, false)
-        Then:
-            $cloud_id: $.cloudid
-        Else:
-            $cloud_id: $.environment.defaultCloud
-      - $.cloud: new(sys:Cloud,id=>$cloud_id)
-      - $.agent: new(sys:SSHAgent, host => $,cloud=>$.cloud)
 
   deploy:
     Arguments:
       plan:
         Contract: {}
     Body:
-      - $.driver: new(sys:AWSBinding,$.cloud.credentials)
-      - $.node: $.driver.createnode($.image,$.flavor,$.name)
+      - If: $.cloudid != null
+        Then:
+           - $cloudid: $.cloudid
+        Else:
+           - $cloudid: $.environment.defaultCloud
+      - $.environment.reporter.report($, 'Creating VM for Apache Server sdfsdfsdfsdf ')
+      - $.cloud: new(sys:Cloud, cloudid => "a25d93ca78de4db098fe169f449a442c")
+      - $.agent: new(sys:SSHAgent, host => $,cloud=>$.cloud)
+      - $.driver: new(sys:AWSBinding,cloud => $.cloud.getCredentials())
+      - $.node: $.driver.createnode($.image,"t1.micro",$.name)
       - $.ipAddresses: $.driver.getpublicips($.node)
       - $.agent.setnode($.node)
   destroy:

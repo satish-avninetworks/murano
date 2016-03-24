@@ -41,6 +41,7 @@ Properties:
   defaultCloud:
     Contract: $.string()
     Usage: Runtime
+    Default: Null
 Methods:
   initialize:
     Body:

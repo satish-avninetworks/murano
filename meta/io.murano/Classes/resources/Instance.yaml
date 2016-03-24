@@ -10,9 +10,6 @@ Name: Instance
 Properties:
   name:
     Contract: $.string().notNull()
-  agent:
-    Contract: $.class(sys:Agent)
-    Usage: Runtime
   assignFloatingIp:
     Contract: $.bool().notNull()
     Default: false
@@ -28,6 +25,7 @@ Properties:
     Contract: $.string()
   cloud:
     Contract: $.class(sys:Cloud)
+    Usage: Runtime
 
 Methods:
   initialize:

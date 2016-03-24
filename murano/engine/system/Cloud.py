@@ -16,15 +16,21 @@
 import os
 from oslo_log import log as logging
 from murano.dsl import dsl
-import muranoclient.v1.client as muranoclient
+from murano.dsl import helpers
 
 LOG = logging.getLogger(__name__)
 
 
 @dsl.name('io.murano.system.Cloud')
 class Cloud(object):
-    def __init__(self, cloud_id):
-        self.credentials = muranoclient.cloud_credentials.get(cloud_id)
+    def __init__(self, cloudid):
+        self._client = helpers.get_environment().clients
+        muranoclient = self._client.get_murano_client()
+        self.credentials = muranoclient.cloud_credentials.get(cloudid)
+
+
+    def getCredentials(self):
+        return self.credentials
 
 
 
