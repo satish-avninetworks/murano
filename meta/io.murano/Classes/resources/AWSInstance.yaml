@@ -25,6 +25,8 @@ Properties:
   floatingIpAddress:
     Contract: $.string()
     Usage: Out
+  flavor:
+    Contract: $.string().notNull()
 
 Methods:
   initialize:
@@ -49,7 +51,7 @@ Methods:
       - $.cloud: new(sys:Cloud, cloudid => "a25d93ca78de4db098fe169f449a442c")
       - $.agent: new(sys:SSHAgent, host => $,cloud=>$.cloud)
       - $.driver: new(sys:AWSBinding,cloud => $.cloud.getCredentials())
-      - $.node: $.driver.createnode($.image,"t1.micro",$.name)
+      - $.node: $.driver.createnode($.image,$.flavor,$.name)
       - $.ipAddresses: $.driver.getpublicips($.node)
       - $.agent.setnode($.node)
   destroy:
