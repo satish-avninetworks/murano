@@ -27,6 +27,9 @@ Properties:
     Usage: Out
   flavor:
     Contract: $.string().notNull()
+  securitygroup:
+    Contract: $.string().notNull()
+
 
 Methods:
   initialize:
@@ -50,7 +53,7 @@ Methods:
       - $.cloud: new(sys:Cloud, cloudid => $cloudid)
       - $.agent: new(sys:SSHAgent, host => $,cloud=>$.cloud)
       - $.driver: new(sys:AWSBinding,cloud => $.cloud.getCredentials())
-      - $.node: $.driver.createnode($.image,$.flavor,$.name)
+      - $.node: $.driver.createnode($.image,$.flavor,$.name,$.securitygroup)
       - $.ipAddresses: $.driver.getpublicips($.node)
       - $.agent.setnode($.node)
   destroy:

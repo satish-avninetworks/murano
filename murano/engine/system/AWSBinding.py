@@ -33,11 +33,11 @@ class AWSBinding(object):
         self.driver = self.cls(cloud.user, cloud.key, region="us-west-1")
         self.cloud = cloud
 
-    def createnode(self, image,flavor,name):
+    def createnode(self, image,flavor,name,security_group):
         images = NodeImage(id=image, name=None,driver=self.driver)
         sizes = self.driver.list_sizes()
         size = [s for s in sizes if s.id == flavor][0]
-        node = self.driver.create_node(name=name,image=images,size=size)
+        node = self.driver.create_node(name=name,image=images,size=size,ex_securitygroup=[security_group])
         # Wait until node is up and running and has IP assigned
         # this blocking call is needed to ensure instance is up
         try:
@@ -68,4 +68,10 @@ class AWSBinding(object):
         except NotImplementedError:
             print("Deploy Node is not implemented for this driver")
         return node
+
+    def create_security_group(self,name,purpose):
+        self.driver.ex_create_security_group(name,purpose)
+
+    def authorize_security_group(self,name,from_port,to_port,cidr_ip,protocol):
+        self.driver.ex_authorize_security_group(name,from_port,to_port,cidr_ip,protocol=protocol)
 
