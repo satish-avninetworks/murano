@@ -75,3 +75,9 @@ class AWSBinding(object):
     def authorize_security_group(self,name,from_port,to_port,cidr_ip,protocol):
         self.driver.ex_authorize_security_group(name,from_port,to_port,cidr_ip,protocol=protocol)
 
+    def delete_security_group(self,name):
+        self.driver.ex_delete_security_group(name)
+
+    def create_network(self,cidr_block,name,instance_tenancy='default'):
+        self.driver.ex_create_network(cidr_block,name,instance_tenancy)
+
