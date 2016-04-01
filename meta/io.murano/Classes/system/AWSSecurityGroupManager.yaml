@@ -53,4 +53,3 @@ Methods:
           Contract: $.string().notNull()
           Default: $this.defaultGroupName
     Body:
-
