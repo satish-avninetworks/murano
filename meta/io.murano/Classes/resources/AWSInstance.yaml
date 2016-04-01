@@ -27,7 +27,7 @@ Properties:
     Usage: Out
   flavor:
     Contract: $.string().notNull()
-  securitygroup:
+  securityGroupName:
     Contract: $.string().notNull()
 
 
@@ -45,6 +45,11 @@ Methods:
       plan:
         Contract: {}
     Body:
+      - $securityGroupName: coalesce(
+            $.securityGroupName,
+            $.environment.securityGroupManager.defaultGroupName
+          )
+      - $.createDefaultInstanceSecurityGroupRules($securityGroupName)
       - If: $.cloudid != null
         Then:
            - $cloudid: $.cloudid
@@ -53,7 +58,7 @@ Methods:
       - $.cloud: new(sys:Cloud, cloudid => $cloudid)
       - $.agent: new(sys:SSHAgent, host => $,cloud=>$.cloud)
       - $.driver: new(sys:AWSBinding,cloud => $.cloud.getCredentials())
-      - $.node: $.driver.createnode($.image,$.flavor,$.name,$.securitygroup)
+      - $.node: $.driver.createnode($.image,$.flavor,$.name,$.securityGroupName)
       - $.ipAddresses: $.driver.getpublicips($.node)
       - $.agent.setnode($.node)
   destroy:
@@ -62,3 +67,7 @@ Methods:
       - $.driver.destroynode($.node)
       - $.node: null
 
+  createDefaultInstanceSecurityGroupRules:
+    Arguments:
+      - groupName:
+          Contract: $.string().notNull()
