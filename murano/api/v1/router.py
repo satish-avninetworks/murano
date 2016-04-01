@@ -20,6 +20,7 @@ from murano.api.v1 import cloud_credentials
 from murano.api.v1 import deployments
 from murano.api.v1 import environments
 from murano.api.v1 import instance_statistics
+from murano.api.v1 import instance_credentials
 from murano.api.v1 import request_statistics
 from murano.api.v1 import services
 from murano.api.v1 import sessions
@@ -274,6 +275,25 @@ class API(wsgi.Router):
                        controller=cloud_credential_resource,
                        action='delete',
                        conditions={'method': ['DELETE']})
+
+        instance_credential_resource = instance_credentials.create_resource()
+        mapper.connect('/identity/instancecredential',
+                       controller=instance_credential_resource,
+                       action='index',
+                       conditions={'method': ['GET']})
+        mapper.connect('/identity/instancecredential/{instance_cred_id}',
+                       controller=instance_credential_resource,
+                       action='show',
+                       conditions={'method': ['GET']})
+        mapper.connect('/identity/instancecredential',
+                       controller=instance_credential_resource,
+                       action='create',
+                       conditions={'method': ['POST']})
+        mapper.connect('/identity/instancecredential/{instance_cred_id}',
+                       controller=instance_credential_resource,
+                       action='delete',
+                       conditions={'method': ['DELETE']})
+
         req_stats_resource = request_statistics.create_resource()
         mapper.connect('/stats',
                        controller=req_stats_resource,
